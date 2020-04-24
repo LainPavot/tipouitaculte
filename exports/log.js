@@ -239,7 +239,20 @@ module.exports = {
     Pin: function(target) {
       maxilog[PUB.servers.commu.id].send(`${TiCu.Date("log")} : Pin \nLa communauté a pin ce message : ${target.url}`)
       minilog[PUB.servers.commu.id].send(`La communauté a pin un message dans <#${target.channel.id}>.`)
-    }
+      },
+      Megenrage: function (message, reactorID, alreadySignaled, directMessage) {
+          if(alreadySignaled && directMessage) {
+              maxilog[PUB.servers.commu.id].send(`${TiCu.Date("log")} : Mégenrage\nUn DM a été envoyé à <@${reactorID}> pour lui annoncer que ce message a déjà été signalé comme comportant du mégenrage (ID : ${message.id}).`)
+          } elseif(alreadySignaled && !directMessage) {
+              maxilog[PUB.servers.commu.id].send(`${TiCu.Date("log")} : Mégenrage\n<@${reactorID}> a été prévenu·e dans <#${PUB.salons.bots.id}> pour lui annoncer que ce message a déjà été signalé comme comportant du mégenrage (ID : ${message.id}).`)
+          } elseif(!alreadySignaled && directMessage) {
+              maxilog[PUB.servers.commu.id].send(`${TiCu.Date("log")} : Mégenrage\nUn DM a été envoyé à <@${message.author.id}> pour lui signaler qu'un de ses messages contient du mégenrage, d'après <@${reactorID}>\n${message.url}`)
+              minilog[PUB.servers.commu.id].send(`Un message de <@${message.author.id}> a été signalé comme comportant du mégenrage par <@${reactor}>. J'ai pu lui envoyer un DM.\n${message.url}`)
+          } elseif(!alreadySignaled && !directMessage) {
+              maxilog[PUB.servers.commu.id].send(`${TiCu.Date("log")} : Mégenrage\nUn DM a été envoyé dans <@${message.channel.id}> pour signaler qu'un message de <@${message.author.id}> contient du mégenrage, d'après <@${reactorID}>.\n${message.url}`)
+              minilog[PUB.servers.commu.id].send(`Un message de <@${message.author.id}> a été signalé comme comportant du mégenrage par <@${reactor}>. J'ai du envoyer un message public dans <#${message.channel.id}.\n${message.url}`)
+          }
+      }
   },
   Auto: {
     SuchTruc: function(msg) {
