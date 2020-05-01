@@ -243,6 +243,18 @@ module.exports = {
         type: "any"
       }
     },
+    time: {
+        chans: {
+            type: "whitelist",
+            list: [PUB.salons.bots.id]
+        },
+        auths: {
+            type: "any"
+        },
+        roles: {
+            type: "any"
+        }
+    },
     vote: {
       chans : {
         type: "any"
@@ -449,6 +461,17 @@ module.exports = {
         type: "any"
       }
     },
+    time: {
+        chans: {
+            type: "any"
+        },
+        auths: {
+            type: "any"
+        },
+        roles: {
+            type: "any"
+        }
+    },
     vote: {
       chans : {
         type: "any"
@@ -539,6 +562,18 @@ module.exports = {
         type: "any"
       }
     },
+    time: {
+        chans: {
+            type: "whitelist",
+            list: [PUB.salons.bots.id]
+        },
+        auths: {
+            type: "any"
+        },
+        roles: {
+            type: "any"
+        }
+    },
     roll: {
       chans : {
         type: "any"
@@ -551,7 +586,20 @@ module.exports = {
       }
     }
   },
-  cdc : {},
+    cdc: {
+        time: {
+            chans: {
+                type: "whitelist",
+                list: [PUB.salons.bots.id]
+            },
+            auths: {
+                type: "any"
+            },
+            roles: {
+                type: "any"
+            }
+        }
+    },
   dm: {
     level: {
       chans: {
