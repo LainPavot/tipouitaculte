@@ -1,10 +1,10 @@
 {
-	// TipouiTaCulte Forever Script
-	"uid": "TiCu",
-	"append": "true",
-	"script": "index.js",
-	"sourceDir": "/media/usb/nodejs/tipouitaculte",
-	"logFile": "/media/usb/nodejs/tipouitaculte/logs/forever.log",
-	"outFile": "/media/usb/nodejs/tipouitaculte/logs/console.log",
-	"errFile": "/media/usb/nodejs/tipouitaculte/logs/errors.log"
+  // TipouiTaCulte Forever Script
+  "uid": "TiCu",
+  "append": "true",
+  "script": "index.js",
+  "sourceDir": "/media/usb/nodejs/tipouitaculte",
+  "logFile": "/media/usb/nodejs/tipouitaculte/logs/forever.log",
+  "outFile": "/media/usb/nodejs/tipouitaculte/logs/console.log",
+  "errFile": "/media/usb/nodejs/tipouitaculte/logs/errors.log"
 }

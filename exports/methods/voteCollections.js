@@ -172,12 +172,25 @@ module.exports = {
     createCollector(type, msg)
   },
   Startup : () => {
-    let votesJSON = JSON.parse(fs.readFileSync(VotesFile).toString());
+    console.log(VotesFile)
+    let votesJSON ;
+    if (!fs.existsSync(VotesFile)) {
+      console.log(`The vote file has not been found on ${VotesFile}. Creating it.`) ;
+      fs.writeFileSync(VotesFile, "[]", { flag: 'w' }, err => {})
+      votesJSON = [] ;
+    } else {
+      votesJSON = JSON.parse(fs.readFileSync(VotesFile).toString());
+    }
     for (const [id, entry] of Object.entries(votesJSON)) {
       if (typeof entry === "object") {
-        (entry.guild ? Discord.guilds.resolve(entry.guild) : tipoui).channels.resolve(entry.chan).messages.fetch(id).then(msg => {
-          createCollector(entry.type, msg);
-        })
+        var target = (entry.guild ? Discord.guilds.resolve(entry.guild) : tipoui) ;
+        target.channels
+          .resolve(entry.chan)
+          .messages.fetch(id)
+          .then(msg => {
+            createCollector(entry.type, msg);
+          })
+        ;
       }
     }
   },

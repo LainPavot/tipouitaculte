@@ -45,9 +45,14 @@ function displayCommands(msg, full = false) {
   let embed = new DiscordNPM.MessageEmbed()
   embed.setColor(38600)
 
-  msg.channel.send(full ? "Voici la liste exhaustive de mes fonctions :" : "Voici la liste de mes fonctions que vous pouvez utiliser :")
+  if (full) {
+    msg.channel.send("Voici la liste exhaustive de mes fonctions :")
+  } else {
+    msg.channel.send("Voici la liste de mes fonctions que vous pouvez utiliser :")
+    aliasList.push("help")
+  }
 
-  if (!full) aliasList.push("help")
+  console.log(TiCu.Commands)
   Object.keys(TiCu.Commands).forEach(key => {
     if (!aliasList.find(v => v === key)) {
       const cmd = TiCu.Commands[key]
@@ -66,7 +71,9 @@ function displayCommands(msg, full = false) {
       })
     }
   })
-  msg.channel.send(embed)
+  if (embed.length !== 0) {
+    msg.channel.send(embed)
+  }
 }
 
 module.exports = {

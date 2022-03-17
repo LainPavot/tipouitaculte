@@ -37,7 +37,14 @@ module.exports = {
     maxilog[global[this.server].id].send(`${this.name} commence.`)
     this.nbMsg = 0
     this.limit = 1
-    games[this.name] = global[this.server].channels.resolve(this.channel).createMessageCollector( m => !!m.content.match(this.trigger))
+    var tcb_channel = global[this.server].channels.resolve(this.channel) ;
+    if (tcb_channel === null) {
+      console.log(`The channel TiCTacBoom (${this.channel}) has not been found.`) ;
+      return ;
+    }
+    games[this.name] = tcb_channel.createMessageCollector(
+      m => !!m.content.match(this.trigger)
+    )
     games[this.name].on("end", () => maxilog[global[this.server].id].send(`${this.name} a pris fin.`))
     games[this.name].on("collect", m => {
       this.nbMsg++

@@ -31,29 +31,36 @@ function autoRoles() {
     "🐸" : "grenouille",
     "frogangel2" : "grenouille-turquoise"
   }
-  tipoui.channels.resolve(PUB.salons.rolessalons.id).messages.fetch(messageForRolesId).then(msg => {
-    msg.createReactionCollector((reaction, user) => {return (!user.bot) && (Object.keys(emojisRoles).includes(reaction.emoji.name))})
-       .on(
-         "collect",
-         reaction => {
-           for (const user of reaction.users.cache.array()) {
-             if (!user.bot) {
-               const member = tipoui.members.resolve(user.id)
-               const askedRoleId = PUB.roles[emojisRoles[reaction.emoji.name]].id
-               if (askedRoleId !== PUB.roles["grenouille-turquoise"].id || member.roles.cache.keyArray().includes(PUB.roles.turquoise.id)) {
-                 if (member.roles.cache.keyArray().includes(askedRoleId)) {
-                   member.roles.remove(askedRoleId)
-                   TiCu.Log.AutoRole(member, emojisRoles[reaction.emoji.name], "remove")
-                 } else {
-                   member.roles.add(askedRoleId)
-                   TiCu.Log.AutoRole(member, emojisRoles[reaction.emoji.name], "add")
-                 }
-               }
-               reaction.users.remove(user.id)
-             }
-           }
-         }
-       )
+  roles_salon = tipoui.channels.resolve(PUB.salons.rolessalons.id)
+  if (roles_salon === null) {
+    console.log(`The channel « roles salon » (${PUB.salons.rolessalons.id}) has not been found`) ;
+    console.log("Deactivating the channel.") ;
+    return ;
+  }
+  roles_salon.messages.fetch(messageForRolesId).then(msg => {
+    msg.createReactionCollector((reaction, user) => {
+      return (!user.bot) && (Object.keys(emojisRoles).includes(reaction.emoji.name))
+    }).on("collect", reaction => {
+      for (const user of reaction.users.cache.array()) {
+        if (!user.bot) {
+          const member = tipoui.members.resolve(user.id)
+          const askedRoleId = PUB.roles[emojisRoles[reaction.emoji.name]].id
+          if (
+            askedRoleId !== PUB.roles["grenouille-turquoise"].id
+            || member.roles.cache.keyArray().includes(PUB.roles.turquoise.id)
+          ) {
+            if (member.roles.cache.keyArray().includes(askedRoleId)) {
+              member.roles.remove(askedRoleId)
+              TiCu.Log.AutoRole(member, emojisRoles[reaction.emoji.name], "remove")
+            } else {
+              member.roles.add(askedRoleId)
+              TiCu.Log.AutoRole(member, emojisRoles[reaction.emoji.name], "add")
+            }
+          }
+          reaction.users.remove(user.id)
+        }
+      }
+    })
   })
   roleOuiNon(messageForExistransinterId, PUB.roles.notifexistransinter.id, "notifexistransinter")
   roleOuiNon(messageForDeposerLesArmesId, PUB.roles.deposerLesArmes.id, "Déposer Les Armes")
@@ -140,9 +147,12 @@ function roleOuiNon(messageId, askedRoleId, roleName) {
   })
 }
 
-// Discord
-Discord.login( CFG.discordToken )
 Discord.once("ready", () => {
+  if (dev) {
+    _.forEach(PUB.servers, (server) => {
+      server.id = PUB.servers.debug.id ;
+    })
+  }
   global.tipoui = Discord.guilds.resolve(PUB.servers.commu.id)
   global.vigi = Discord.guilds.resolve(PUB.servers.vigi.id)
   global.cdc = Discord.guilds.resolve(PUB.servers.cdc.id)
@@ -198,50 +208,59 @@ Discord.once("ready", () => {
   }
 })
 
+console.log()
 if (!dev || (dev && devConfig)) {
   if (!dev || (devConfig.parsing && devConfig.parsing.message)) {
-    Discord.on("message", (msg) => {
+    console.log("Loading module parseMessage on message.")
+    Discord.on("messageCreate", (msg) => {
       parseMessage(msg)
     })
   }
 
   if (!dev || (devConfig.parsing && devConfig.parsing.messageDelete)) {
+    console.log("Loading module parseMessageDelete on messageDelete.")
     Discord.on("messageDelete", (msg) => {
       parseMessageDelete(msg)
     })
   }
 
   if (!dev || (devConfig.parsing && devConfig.parsing.messageUpdate)) {
+    console.log("Loading module parseMessageUpdate on messageUpdate.")
     Discord.on("messageUpdate", (oldMsg, newMsg) => {
       parseMessageUpdate(oldMsg, newMsg)
     })
   }
 
   if (!dev || (devConfig.parsing && devConfig.parsing.messageReactionAdd)) {
+    console.log("Loading module parseReaction on messageReactionAdd.")
     Discord.on("messageReactionAdd", (reaction, usr) => {
       parseReaction(reaction, usr, "add")
     })
   }
 
   if (!dev || (devConfig.parsing && devConfig.parsing.messageReactionRemove)) {
+    console.log("Loading module parseReaction on messageReactionRemove.")
     Discord.on("messageReactionRemove", (reaction, usr) => {
       parseReaction(reaction, usr, "remove")
     })
   }
 
   if (!dev || (devConfig.parsing && devConfig.parsing.guildMemberAdd)) {
+    console.log("Loading module parseGuildMemberAdd on guildMemberAdd.")
     Discord.on("guildMemberAdd", usr => {
       parseGuildMemberAdd(usr)
     })
   }
 
   if (!dev || (devConfig.parsing && devConfig.parsing.guildMemberRemove)) {
+    console.log("Loading module parseGuildMemberRemove on guildMemberRemove.")
     Discord.on("guildMemberRemove", usr => {
       parseGuildMemberRemove(usr)
     })
   }
 
   if (!dev || (devConfig.parsing && devConfig.parsing.guildMemberUpdate)) {
+    console.log("Loading module parseGuildMemberUpdate on guildMemberUpdate.")
     Discord.on("guildMemberUpdate", (oldUsr, newUsr) => {
       parseGuildMemberUpdate(oldUsr, newUsr)
     })
@@ -252,3 +271,6 @@ if (!dev || (dev && devConfig)) {
     Server.listen(3000);
   }
 }
+
+// Discord
+Discord.login(CFG.discordToken)

@@ -13,7 +13,7 @@
       "grandeTour" : "554778172051161089"
     },
     "debug": {
-      "id": "519618688010158090",
+      "id": "915547901378322443",
       "maxilog": "",
       "minilog": ""
     },
@@ -26,7 +26,7 @@
   "reverseServers": {
     "355041348476338182": "commu",
     "554773912374870058": "vigi",
-    "519618688010158090": "debug",
+    "915547901378322443": "debug",
     "447723612066283530": "cdc"
   },
   "categories": {
@@ -81,25 +81,15 @@
       "bot" : true,
       "dev" : false
     },
-    "xenolune": {
-      "id" : "222028577405665283",
-      "bot" : false,
-      "dev" : true
-    },
-    "syrinx": {
-      "id" : "205399579884126217",
-      "bot" : false,
-      "dev" : true
-    },
-    "yuffy" : {
-      "id" : "260008409267568640",
-      "bot" : false,
-      "dev" : true
-    },
     "echarpe" : {
       "id" : "269231373330415637",
       "bot" : false,
       "dev" : false
+    },
+    "lainou" : {
+      "id" : "376860222792138754",
+      "bot" : false,
+      "dev" : true
     }
   },
   "salons": {

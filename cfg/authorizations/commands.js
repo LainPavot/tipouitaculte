@@ -194,7 +194,8 @@ module.exports = {
       },
       auths : {
         type: "whitelist",
-        list: [PUB.users.syrinx.id, PUB.users.xenolune.id, PUB.users.echarpe.id]
+        list: [PUB.users.lainou.id]
+        // list: [PUB.users.syrinx.id, PUB.users.xenolune.id, PUB.users.echarpe.id]
       }
     },
     dm : {

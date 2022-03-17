@@ -3,6 +3,11 @@ module.exports = function(data) {
   let action = data.action ? data.action : ""
   let target = data.target ? data.target : ""
   let content = data.content ? data.content : ""
+  if (!fs.existsSync(target)) {
+    console.log(`The JSON file has not been found on ${target}. Creating it.`) ;
+    fs.writeFileSync(target, "[]", { flag: 'w' }, err => {})
+    votesJSON = [] ;
+  }
   let file = fs.readFileSync(target)
   let read = JSON.parse(file)
   if(!read) { TiCu.Log.Json("err", "read"); return false }

@@ -67,7 +67,12 @@ module.exports = {
         }
       )
     } else {
-      tipoui.channels.resolve(PUB.salons.salleDesVotes.id).send(`<@&${PUB.roles.vote.id}>`, createUpdateEmbed()).then(
+      var salle_des_votes = tipoui.channels.resolve(PUB.salons.salleDesVotes.id) ;
+      if (salle_des_votes === null) {
+        console.log(`Could not channel salle des votes (${PUB.salons.salleDesVotes.id}.`) ;
+        return ;
+      }
+      salle_des_votes.send(`<@&${PUB.roles.vote.id}>`, createUpdateEmbed()).then(
         msg => {
           msg.react("✅")
           msg.react("❌")

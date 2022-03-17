@@ -4,6 +4,7 @@ const EventsModule = require("events")
 const fs = require("fs")
 const cron = require('node-cron')
 const crypto = require('crypto');
+const _ = require('lodash');
 const {MessageAttachment} = require("discord.js");
 
 const helpText = `
@@ -71,7 +72,7 @@ function parseCommandLineArgs() {
     switch(true) { //Switching on value but... hey, needed regExp ^^
       case value === "--dev":
       case value === "-d":
-        dev = true
+        global.dev = true
         break
       case value === "--help":
       case value === "-h":
@@ -148,20 +149,18 @@ module.exports = {
     global.DB = new SequelizeDB(CFG.sequelizeURL, {logging: false})
     global.DiscordNPM = require("discord.js")
     global.bignum = require('bignum')
+    global._ = require('lodash')
     const intentFlags = DiscordNPM.Intents.FLAGS
     global.Discord = new DiscordNPM.Client({
       fetchAllMembers: true,
-      ws: {
-        intents: [
-          intentFlags.GUILDS,
-          intentFlags.GUILDS,
-          intentFlags.GUILD_MEMBERS,
-          intentFlags.GUILD_MESSAGES,
-          intentFlags.GUILD_MESSAGE_REACTIONS,
-          intentFlags.DIRECT_MESSAGES,
-          intentFlags.DIRECT_MESSAGE_REACTIONS
-        ]
-      }
+      intents: [
+        intentFlags.GUILDS,
+        intentFlags.GUILD_MEMBERS,
+        intentFlags.GUILD_MESSAGES,
+        intentFlags.GUILD_MESSAGE_REACTIONS,
+        intentFlags.DIRECT_MESSAGES,
+        intentFlags.DIRECT_MESSAGE_REACTIONS
+      ]
     })
     global.Event = new EventsModule.EventEmitter()
     global.VotesFile = "private/votes.json"
@@ -269,54 +268,65 @@ module.exports = {
     global.cmdRegex = dev ? /^%[a-zA-Z]/ : /^![a-zA-Z]/  //change the call character for TTC
     global.parseMessage = (msg) => {
       TiCu.Xp.processXpFromMessage("add", msg)
-      if(!msg.author.bot) {
-        if(msg.channel.type === "dm" ) {
-          let user = tipoui.members.resolve(msg.author.id) ? tipoui.members.resolve(msg.author.id) : undefined
-          if(user) {
-            if(!user.roles.cache.find(e => e.id === PUB.roles.quarantaineRole.id)) {
-              if(msg.content.match(cmdRegex)) {
-                parseAndRunCommand(msg)
-              } else {
-                let embed = createEmbedCopy(msg, user)
-                vigi.channels.resolve(PUB.salons.dmVigiServ.id).send(embed)
-                  .then(() => TiCu.Log.DM(embed, msg))
-              }
-            } else msg.reply("utilise plutôt <#" + PUB.salons.quarantaineUser.id + "> s'il te plaît. Ce message n'a pas été transmis.")
-          } else msg.reply("je ne parle qu'aux gens de Tipoui ♥")
-        } else if(msg.channel.id === PUB.salons.quarantaineUser.id || msg.channel.id === PUB.salons.quarantaineVigiServ.id) {
-          if(msg.channel.id === PUB.salons.quarantaineUser.id) {
-            let user = msg.member
-            vigi.channels.resolve(PUB.salons.quarantaineVigiServ.id).send(createEmbedCopy(msg, user))
-              .then(newMsg => TiCu.Log.Quarantaine("reçu", newMsg, msg))
-          } else if(msg.channel.id === PUB.salons.quarantaineVigiServ.id) {
-            tipoui.channels.resolve(PUB.salons.quarantaineUser.id).send(msg.content)
-              .then(newMsg => TiCu.Log.Quarantaine("envoyé", newMsg, msg))
-          }
-        } else if(msg.channel.id === PUB.salons.invite.id) {
-          if(msg.content.match(cmdRegex)) {
-            parseAndRunCommand(msg)
-          }
-          tipoui.channels.resolve(PUB.salons.inviteArchive.id).send(createEmbedCopy(msg, msg.member)).then().catch()
-        } else if (msg.channel.id === PUB.salons.chaudron.id) {
-          let messageRepostAttachments = []
-          if (msg.attachments.size > 0) {
-            let attachments = Array.from(msg.attachments.values())
-            for (let i=0; i < attachments.length; i++) {
-              messageRepostAttachments.push(new MessageAttachment(attachments[i].attachment))
+      if (msg.author.bot) {
+        return ;
+      }
+      if(msg.channel.type === "dm" ) {
+        let user = tipoui.members.resolve(msg.author.id) ? tipoui.members.resolve(msg.author.id) : undefined
+        if(user) {
+          if(!user.roles.cache.find(e => e.id === PUB.roles.quarantaineRole.id)) {
+            if(msg.content.match(cmdRegex)) {
+              parseAndRunCommand(msg)
+            } else {
+              let embed = createEmbedCopy(msg, user)
+              vigi.channels.resolve(PUB.salons.dmVigiServ.id).send(embed)
+                .then(() => TiCu.Log.DM(embed, msg))
             }
-            tipoui.channels.resolve(PUB.salons.photoChaudron.id).send("<@"+msg.member.id+">\n"+msg.content, messageRepostAttachments).then(
-              newMsg => tipoui.channels.resolve(PUB.salons.chaudron.id)
-                              .send("Auteurice : <@"+msg.member.id+">\nContenu d'origine du message : \"" + msg.content + "\"\nImages : " + newMsg.url)
-                              .then(() => {msg.delete()}).catch()
-            ).catch()
-          } else if(msg.content.match(cmdRegex)) {
-            parseAndRunCommand(msg)
+          } else {
+            msg.reply("utilise plutôt <#" + PUB.salons.quarantaineUser.id + "> s'il te plaît. Ce message n'a pas été transmis.")
           }
+        } else {
+          msg.reply("je ne parle qu'aux gens de Tipoui ♥")
+        }
+      } else if(msg.channel.id === PUB.salons.quarantaineUser.id || msg.channel.id === PUB.salons.quarantaineVigiServ.id) {
+        if(msg.channel.id === PUB.salons.quarantaineUser.id) {
+          let user = msg.member
+          vigi.channels.resolve(PUB.salons.quarantaineVigiServ.id).send(createEmbedCopy(msg, user))
+            .then(newMsg => TiCu.Log.Quarantaine("reçu", newMsg, msg))
+        } else if(msg.channel.id === PUB.salons.quarantaineVigiServ.id) {
+          tipoui.channels.resolve(PUB.salons.quarantaineUser.id).send(msg.content)
+            .then(newMsg => TiCu.Log.Quarantaine("envoyé", newMsg, msg))
+        }
+      } else if(msg.channel.id === PUB.salons.invite.id) {
+        if(msg.content.match(cmdRegex)) {
+          parseAndRunCommand(msg)
+        }
+        tipoui.channels.resolve(PUB.salons.inviteArchive.id).send(createEmbedCopy(msg, msg.member)).then().catch()
+      } else if (msg.channel.id === PUB.salons.chaudron.id) {
+        let messageRepostAttachments = []
+        if (msg.attachments.size > 0) {
+          let attachments = Array.from(msg.attachments.values())
+          for (let i=0; i < attachments.length; i++) {
+            messageRepostAttachments.push(new MessageAttachment(attachments[i].attachment))
+          }
+          tipoui.channels
+            .resolve(PUB.salons.photoChaudron.id)
+            .send("<@"+msg.member.id+">\n"+msg.content, messageRepostAttachments)
+            .then(newMsg => (
+              tipoui.channels
+              .resolve(PUB.salons.chaudron.id)
+              .send("Auteurice : <@"+msg.member.id+">\nContenu d'origine du message : \"" + msg.content + "\"\nImages : " + newMsg.url)
+              .then(() => {msg.delete()}).catch()
+            ))
+            .catch()
+          ;
         } else if(msg.content.match(cmdRegex)) {
           parseAndRunCommand(msg)
-        } else {
-          parseForAutoCommands(msg)
         }
+      } else if(msg.content.match(cmdRegex)) {
+        parseAndRunCommand(msg)
+      } else {
+        parseForAutoCommands(msg)
       }
     }
 

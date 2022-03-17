@@ -4,6 +4,9 @@ SGBD = sqlite
 run: ./cfg/private.json
 	node --trace-warnings ./index.js
 
+dev: ./cfg/private.json
+	node --trace-warnings ./index.js -d --config devConfig.json
+
 ./cfg/private.json:
 	echo "please, fill the file ./cfg/private.json"
 	echo "Please set the databgase access in sequelizeURL - example: $(SGBD):///some.db.file"
